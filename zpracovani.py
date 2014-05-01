@@ -26,6 +26,24 @@ im = image[:]
 plt.figure(1)
 plt.title('Original image')
 plt.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
+#%%
+cernobily = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+TF = cv2.Canny(cernobily,60,60)
+ #plt.imshow(TF)
+#plt.show()
+kernel_big = skimage.morphology.diamond(1)
+TF = skimage.morphology.binary_dilation(TF, kernel_big) # DILATACE
+TF = cv2.GaussianBlur(TF,(10,10), 2) #GAUSSOVSKA FILTRACE PODRUHE
+
+plt.figure(2)
+plt.imshow(TF, cmap=plt.cm.gray, interpolation='nearest')
+#%%
+TT = TF[20:30][int(image.shape[0]/2)-20:int(image.shape[0]/2)+20]
+plt.figure(3)
+plt.imshow(TT, cmap=plt.cm.gray, interpolation='nearest')
+
+#%%
+
 
 plt.figure(2)
 image = image>150

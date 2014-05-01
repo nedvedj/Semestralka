@@ -50,7 +50,7 @@ class Znacky:
             print "Problems with file " + "data.pkl"
         pass
 
-    def one_file_features(self, im, demo=False):
+    def one_file_features(self, im, demo=True):
     
         """
         Zde je kontruován vektor příznaků pro klasfikátor
