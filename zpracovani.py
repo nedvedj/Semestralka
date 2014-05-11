@@ -26,40 +26,44 @@ im = image[:]
 plt.figure(1)
 plt.title('Original image')
 plt.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
-#%%
-cernobily = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-TF = cv2.Canny(cernobily,60,60)
- #plt.imshow(TF)
-#plt.show()
-kernel_big = skimage.morphology.diamond(1)
-TF = skimage.morphology.binary_dilation(TF, kernel_big) # DILATACE
-TF = cv2.GaussianBlur(TF,(10,10), 2) #GAUSSOVSKA FILTRACE PODRUHE
 
-plt.figure(2)
+#%% Prevod RGB2GRAY pro detekci hran a dalsi zpracovani
+cernobily = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+TF = cv2.Canny(cernobily,60,60) # Detekce hran
+plt.figure(19)
+plt.imshow(TF)
+
+kernel_big = skimage.morphology.diamond(1) 
+TF = skimage.morphology.binary_dilation(TF, kernel_big) # Na detekovane hrany pouzijeme dilataci
+TF = cv2.GaussianBlur(TF,(5,5), 5) # Gausovska filtrace pro odstraneni nezadoucich objektu
+
+plt.figure(20)
 plt.imshow(TF, cmap=plt.cm.gray, interpolation='nearest')
-#%%
-TT = TF[20:30][int(image.shape[0]/2)-20:int(image.shape[0]/2)+20]
+
+#%% Vyriznuti objektu kolem stredu obrazu
+TT = TF[0:30][int(image.shape[0]/2)-20:int(image.shape[0]/2)+20]
 plt.figure(3)
 plt.imshow(TT, cmap=plt.cm.gray, interpolation='nearest')
 
 #%%
 
 
-plt.figure(2)
-image = image>150
-plt.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
+im = image>150 
+plt.figure(4)
+plt.imshow(im, cmap=plt.cm.gray, interpolation='nearest')
 
+import skimage.transform
 
-image = skimage.transform.resize(im, [10, 10])
+im = skimage.transform.resize(im, [10, 10])
 
-plt.figure(3)
-plt.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
+plt.figure(5)
+plt.imshow(im, cmap=plt.cm.gray, interpolation='nearest')
 
-
+#%% Prace s filtrem
 from skimage import data
 from skimage import filter
 
-camera = im[:]
+camera = image[:]
 val = filter.threshold_otsu(camera)
 image = camera < val
 
@@ -90,5 +94,5 @@ plt.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
 #from skimage import data, io, filter
 
 plt.figure(6)
-edges = filter.sobel(im)
+edges = filter.sobel(image)
 plt.imshow(edges)
