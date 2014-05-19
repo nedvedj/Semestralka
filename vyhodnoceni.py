@@ -5,7 +5,6 @@ Created on Thu Apr 24 12:14:26 2014
 @author: nedvedj
 """
 
-import signal
 
 import skimage
 import skimage.io

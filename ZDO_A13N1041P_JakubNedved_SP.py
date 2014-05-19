@@ -3,7 +3,6 @@
 
 # <codecell>
 
-import matplotlib.pyplot as plt
 import skimage
 import skimage.feature
 dir(skimage.feature)
@@ -20,65 +19,73 @@ import pickle
 import sklearn
 import sklearn.naive_bayes
 
+import cv2
+import skimage.io
+import skimage.morphology
+import urllib
+
+
 
 class Znacky:
     """
-    M. Jiřík
-    I. Pirner
-    P. Zimmermann
-    Takto bude vytvořeno vaše řešení. Musí obsahovat funkci
-    'rozpoznejZnacku()', která má jeden vstupní parametr. Tím je obraz. Doba
-    trváná funkce je omezena na 1 sekundu. Tato funkce rovněž musí obsahovat 
-    ukázkový režim. V něm je pomocí obrázků vysvětleno, jak celá věc pracuje.
+    
     #"""
-    def __init__(self):
-        # Toto mi umožňuje zapínat a vypínat různé části příznakového vektoru
-        self.grayLevelFeatures = True
-        self.colorFeatures = False  # rozpoznávání podle barvy
+    def __init__(self, params_online=True):
+        self.colorFeatures = False
         self.hogFeatures = False
-        self.labels = None
-
+        self.grayLevelFeatures = True
+        
         # Načítání natrénovaných parametrů klasifikátoru ze souboru atd.
-        # path_to_script = os.path.dirname(os.path.abspath(__file__))
-        classifier_path = os.path.join(path_to_script,
-                                       "data.pkl")
+        if params_online:
+            url = 'https://raw.githubusercontent.com/nedvedj/Semestralka/master/data.pkl'
+            urllib.urlretrieve(url, "data.pkl")
+            
         try:
-            saved = pickle.load(open(classifier_path,  "rb"))
-            self.clf = saved[0]
-            self.labels = saved[1]
+            self.clf = pickle.load( open( "data.pkl", "rb" ) )
         except:
             print "Problems with file " + "data.pkl"
         pass
+    
 
-    def one_file_features(self, im, demo=True):
+
+    def one_file_features(self, image, demo=True):
     
         """
         Zde je kontruován vektor příznaků pro klasfikátor
         """
-        # color processing
-        fd = np.array([])
-        im = im>150
-        img = skimage.color.rgb2gray(im)
-        # graylevel
-        if self.hogFeatures:
-            pass
+  
+        pole = np.array([])
 
-        if self.grayLevelFeatures:
-            imr = skimage.transform.resize(img, [10, 10])
-            glfd = imr.reshape(-1)
-            fd = np.append(fd, glfd)
+        #if self.colorFeatures:
+        #    pole = np.append(pole, self.colorFeatures)
             
-            if demo:
-                plt.imshow(imr)
-                plt.show()
-
-        #fd.append(hsvft[:])
-        if self.colorFeatures:
-            fd = np.append(fd, self.colorFeatures)
-            pass
-
-        #print hog_image
-        return fd
+        #%% Prevod RGB2GRAY pro detekci hran a dalsi zpracovani
+        cernobily = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+        
+        #%% Změna velikosti
+        image = skimage.transform.resize(image, [50, 50])
+        
+     
+        #%% Vyriznuti objektu kolem stredu obrazu
+        image = image[int(image.shape[0]/2)-20:int(image.shape[0]/2)+20, int(image.shape[1]/2)-20:int(image.shape[1]/2)+20] 
+        pole = np.append(pole, image.reshape(-1))
+        
+        #%% Detekce hran
+        
+        cernobily = cv2.Canny(cernobily,60,60)
+        
+        kernel_big = skimage.morphology.diamond(1) 
+        cernobily = skimage.morphology.binary_dilation(cernobily, kernel_big) # Na detekovane hrany pouzijeme dilataci
+        cernobily = cv2.GaussianBlur(cernobily,(5,5), 5) # Gausovska filtrace pro odstraneni nezadoucich objektu
+        
+        
+        #%% Vyriznuti objektu kolem stredu obrazu
+        cernobily = cernobily[int(cernobily.shape[0]/2)-20:int(cernobily.shape[0]/2)+20, int(cernobily.shape[1]/2)-20:int(cernobily.shape[1]/2)+20]
+       
+        pole = np.append(pole, cernobily.reshape(-1))
+        
+    
+        return pole
 
     # nacitani z adresare
     def readImageDir(self, path):
@@ -113,17 +120,18 @@ class Znacky:
 
         for fl in tfiles:
             i = i + 1
-            print i
             im = skimage.io.imread(fl)
             fv = self.one_file_features(im)
+            print 'Soubor c. ',i, ' Pocet priznaku: ', size(fv)
             featuresAll.append(fv)
 
         featuresAll = np.array(featuresAll)
-
+        print 'Vse precteno, jde se trenovat'
+        
         # Trénování klasifikátoru
 
         labels, inds = np.unique(tlabels, return_inverse=True)
-
+       
         #from sklearn import svm
         #clf = svm.SVC()
         clf = sklearn.naive_bayes.GaussianNB()
