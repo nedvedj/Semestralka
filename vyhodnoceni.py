@@ -1,36 +1,70 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 24 12:14:26 2014
-
-@author: nedvedj
-"""
-
 
 import skimage
 import skimage.io
 import numpy as np
 
-import os
-path_to_script = os.path.join(os.path.dirname(__file__))
-# na windows nefunguje knihovna contextlib
-# v kodu je proto náhrada od M. Červeného pomocí time
+
 import time
 
-        
+import os
+import glob
+
+def readImageDir(path=None):
+        dirs = glob.glob(os.path.join(os.path.normpath(path), '*'))
+        #print dirs
+        labels = []
+        #nlabels = []
+        files = []
+
+        #i = 0
+        for onedir in dirs:
+
+            #print onedir
+            base, lab = os.path.split(onedir)
+            if os.path.isdir(onedir):
+                filesInDir = glob.glob(os.path.join(onedir, '*'))
+                for onefile in filesInDir:
+                    labels.append(lab)
+                    files.append(onefile)
+                    #nlabels.append(i)
+
+        return files, labels
+    
+
 def kontrola(ukazatel):
-    studentske_reseni = ukazatel() # tim je zavolán váš konstruktor __init__
-    
-    obrazky = ['http://147.228.240.61/zdo/P2_id14368_ff74-FL_1_131030_00002530.jpg',
-             'http://147.228.240.61/zdo/Z3_id18972_ff2347-FL_1_131030_00020439.jpg',
-             'http://147.228.240.61/zdo/P1_id13258_ff7546-FL_1_131030_00066180-1.jpg'
+    studentske_reseni = ukazatel() 
+    """
+    cesta = "../zdo2014-training/"
+    obrazky = ['P1/P1_id13063_ff3512-FL_1_131030_00035316.jpg',
+             'P1/P1_id13064_ff3513-FL_1_131030_00035322.jpg',
+             'P1/P1_id13339_ff8126-FL_1_131030_00070898.jpg',
+             'P2/P2_id14356_ff40-131030_00002105.jpg',
+             'P2/P2_id14368_ff67-FL_1_131030_00002463-1.jpg',
+             'P2/P2_id14375_ff88-FL_1_131030_00002661-2.jpg',
+             'Z3/Z3_id18848_ff2515-131030_00029137.jpg',
+             'Z3/Z3_id18849_ff2523-131030_00029216.jpg',
+             'Z3/Z3_id18970_ff2345-FL_1_131030_00020419-1.jpg'
              ]
-    reseni = ['P2', 'Z3', 'P1']
+    reseni = ['P1', 'P1', 'P1', 'P2', 'P2', 'P2', 'Z3', 'Z3', 'Z3']
+    """
     
+    #datadir='../zdo2014-training1/'
+         
+    obrazky, reseni = readImageDir('../zdo2014-training3/')
+    #obrazky = obrazky[::25]
+    #reseni = reseni[::25]
+
     vysledky = []
     
     for i in range(0, len(obrazky)):
         cas1 = time.clock()
-        im = skimage.io.imread(obrazky[i])
+        #im = skimage.io.imread(cesta+obrazky[i])
+        #print obrazky[i]
+        try:
+            im = skimage.io.imread(obrazky[i])
+        except IOError:
+            continue
+            
         result = studentske_reseni.rozpoznejZnacku(im)           
 
         cas2 = time.clock()   
@@ -40,11 +74,11 @@ def kontrola(ukazatel):
             result = 0
 
         vysledky.append(result)
-            
+       
     hodnoceni = np.array(reseni) == np.array(vysledky)
     skore = np.sum(hodnoceni.astype(np.int)) / np.float(len(reseni))
     
     print skore
     
 ukazatel = Znacky
-kontrola(ukazatel)
+vysle = kontrola(ukazatel)
