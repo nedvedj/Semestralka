@@ -31,7 +31,7 @@ def readImageDir(path=None):
         return files, labels
     
 
-def kontrola(ukazatel):
+def kontrola(ukazatel,data):
     studentske_reseni = ukazatel() 
     """
     cesta = "../zdo2014-training/"
@@ -51,8 +51,12 @@ def kontrola(ukazatel):
     #datadir='../zdo2014-training1/'
          
     obrazky, reseni = readImageDir('../zdo2014-training3/')
-    #obrazky = obrazky[::25]
-    #reseni = reseni[::25]
+    
+    #obrazky = obrazky[::data]
+    #reseni = reseni[::data]
+    #velikost = len(obrazky)
+    #obrazky = obrazky[int(velikost/5*4):]
+    #reseni = reseni[int(velikost/5*4):]
 
     vysledky = []
     
@@ -64,6 +68,7 @@ def kontrola(ukazatel):
             im = skimage.io.imread(obrazky[i])
         except IOError:
             continue
+        if i==1000: print 'Soubor c. ',i
             
         result = studentske_reseni.rozpoznejZnacku(im)           
 
@@ -81,4 +86,8 @@ def kontrola(ukazatel):
     print skore
     
 ukazatel = Znacky
-vysle = kontrola(ukazatel)
+
+for data in [12,16,20]:
+    kontrola(ukazatel,data)
+
+
