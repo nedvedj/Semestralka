@@ -187,8 +187,14 @@ class Znacky:
 # Pokud bude modul jen includován, tato část se nespustí. To je požadované
 # chování
 if __name__ == "__main__":
+    import sys
     zn = Znacky()
-    #zn.train()
-    zn.train(datadir='/home/mjirik/data/zdo2014/zdo2014-training3/')
-    zn.kontrola('/home/mjirik/data/zdo2014/zdo2014-training1/')
+    if len(sys.argv) < 3:
+        zn.train()
+    else:
 
+        #zn.train(datadir='/home/mjirik/data/zdo2014/zdo2014-training3/')
+        #zn.kontrola('/home/mjirik/data/zdo2014/zdo2014-training1/')
+
+        zn.train(datadir=sys.argv[1])
+        zn.kontrola(sys.argv[2])
