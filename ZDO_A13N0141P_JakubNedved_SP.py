@@ -22,11 +22,13 @@ import sklearn.naive_bayes
 import skimage.io
 import skimage.morphology
 
+import time
+
 
 
 class Znacky:
     """
-    
+
     #"""
     def __init__(self):
         # Toto mi umožňuje zapínat a vypínat různé části příznakového vektoru
@@ -44,11 +46,11 @@ class Znacky:
         except:
             print 'problem se vstupnim souborem'
         pass
-    
+
 
 
     def one_file_features(self, im, demo=False):
-    
+
         """
         Zde je kontruován vektor příznaků pro klasfikátor
         """
@@ -56,25 +58,25 @@ class Znacky:
 
         import skimage.transform
         import skimage
-        
+
         # Zmena velikosti obrazku
         image = skimage.transform.resize(im, [50, 50])
 
         #%% Vyriznuti objektu kolem stredu obrazu
         image = image[int(image.shape[0]/2)-20:int(image.shape[0]/2)+20, int(image.shape[1]/2)-20:int(image.shape[1]/2)+20]
         fd = np.append(fd, image.reshape(-1))
-        
+
         # Vyuziti Otsuova filtru
         from skimage import filter
 
         threshold = filter.threshold_otsu(image)
         image =image < threshold
-        
-        fd = np.append(fd, image.reshape(-1))        
-       
+
+        fd = np.append(fd, image.reshape(-1))
+
         #%% Změna velikosti
 
-        
+
         #fd.append(hsvft[:])
        # if self.colorFeatures:
        #     fd = np.append(fd, self.colorFeatures)
@@ -109,7 +111,7 @@ class Znacky:
         # po kolika souborech budu trenovat
         tfiles = tfiles[::5]
         tlabels = tlabels[::5]
-        
+
 
         featuresAll = []
         i = 0
@@ -122,16 +124,16 @@ class Znacky:
                 continue
            # im = skimage.io.imread(fl)
             fv = self.one_file_features(im)
-            print 'Soubor c. ',i, ' Pocet priznaku: ', size(fv)
+            print 'Soubor c. ',i, ' Pocet priznaku: ', len(fv)
             featuresAll.append(fv)
 
         featuresAll = np.array(featuresAll)
         print 'Vse precteno, jde se trenovat'
-        
+
         # Trénování klasifikátoru
 
         labels, inds = np.unique(tlabels, return_inverse=True)
-        
+
         #from sklearn import svm
         #clf = svm.SVC()
         clf = sklearn.naive_bayes.GaussianNB()
@@ -153,12 +155,46 @@ class Znacky:
         retval = self.labels[class_index]
 
         return retval[0]
-        
 
+
+    def kontrola(self, datadir=None):
+        """
+        Jednoduché vyhodnocení výsledků
+        """
+
+        obrazky, reseni = self.readImageDir(datadir)
+
+        vysledky = []
+
+        for i in range(0, len(obrazky)):
+            cas1 = time.clock()
+            im = skimage.io.imread(obrazky[i])
+            result = self.rozpoznejZnacku(im)
+
+            cas2 = time.clock()
+
+            if((cas2 - cas1) >= 1.0):
+                print "cas vyprsel"
+                result = 0
+
+            vysledky.append(result)
+
+        hodnoceni = np.array(reseni) == np.array(vysledky)
+        skore = np.sum(hodnoceni.astype(np.int)) / np.float(len(reseni))
+
+        print skore
 # následující zápis zařídí spuštění při volání z příkazové řádky.
 # Pokud bude modul jen includován, tato část se nespustí. To je požadované
 # chování
 if __name__ == "__main__":
+    import sys
     zn = Znacky()
-    zn.train()
-    
+    if len(sys.argv) < 3:
+        zn.train()
+    else:
+
+        #zn.train(datadir='/home/mjirik/data/zdo2014/zdo2014-training3/')
+        #zn.kontrola('/home/mjirik/data/zdo2014/zdo2014-training1/')
+
+        zn.train(datadir=sys.argv[1])
+        zn.kontrola(sys.argv[2])
