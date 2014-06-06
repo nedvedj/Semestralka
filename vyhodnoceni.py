@@ -52,8 +52,8 @@ def kontrola(ukazatel,data):
          
     obrazky, reseni = readImageDir('../zdo2014-training3/')
     
-    #obrazky = obrazky[::data]
-    #reseni = reseni[::data]
+    obrazky = obrazky[::data]
+    reseni = reseni[::data]
     #velikost = len(obrazky)
     #obrazky = obrazky[int(velikost/5*4):]
     #reseni = reseni[int(velikost/5*4):]
