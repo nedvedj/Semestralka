@@ -195,6 +195,7 @@ if __name__ == "__main__":
 
         #zn.train(datadir='/home/mjirik/data/zdo2014/zdo2014-training3/')
         #zn.kontrola('/home/mjirik/data/zdo2014/zdo2014-training1/')
-
+        print "trenovani"
         zn.train(datadir=sys.argv[1])
+        print "kontrola"        
         zn.kontrola(sys.argv[2])
