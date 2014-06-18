@@ -44,7 +44,7 @@ class Znacky:
             self.clf = saved[0]
             self.labels = saved[1]
         except:
-            print 'problem se vstupnim souborem'
+    ValueError: need more than 1 value to unpack        print 'problem se vstupnim souborem'
         pass
 
 
@@ -58,18 +58,21 @@ class Znacky:
 
         import skimage.transform
         import skimage
+        #import cv2
 
         # Zmena velikosti obrazku
-        image = skimage.transform.resize(im, [50, 50])
-
+        image = skimage.transform.resize(im, [40, 40])
+        #image = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
         #%% Vyriznuti objektu kolem stredu obrazu
-        image = image[int(image.shape[0]/2)-20:int(image.shape[0]/2)+20, int(image.shape[1]/2)-20:int(image.shape[1]/2)+20]
+        image = image[int(image.shape[0]/2)-10:int(image.shape[0]/2)+15, int(image.shape[1]/2)-10:int(image.shape[1]/2)+15]
+        #image=image[::5]
         fd = np.append(fd, image.reshape(-1))
 
         # Vyuziti Otsuova filtru
         from skimage import filter
 
         threshold = filter.threshold_otsu(image)
+        #image=image[::5]
         image =image < threshold
 
         fd = np.append(fd, image.reshape(-1))
