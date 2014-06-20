@@ -44,7 +44,8 @@ class Znacky:
             self.clf = saved[0]
             self.labels = saved[1]
         except:
-    ValueError: need more than 1 value to unpack        print 'problem se vstupnim souborem'
+            print 'problem se vstupnim souborem'
+            #ValueError: need more than 1 value to unpack  
         pass
 
 
